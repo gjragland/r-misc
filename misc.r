@@ -14,4 +14,7 @@ abline(fm,col='white')
 .libPaths("/usr/lib/R/library")
 install.packages()
 
+#read delimited files with special characters
+data<-read.table('S1_expressionAndAnno.txt',header=T,sep="\t",row.names=NULL,stringsAsFactors=F,quote="\"",comment.char="")
+
 
