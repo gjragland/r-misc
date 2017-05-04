@@ -17,4 +17,11 @@ install.packages()
 #read delimited files with special characters
 data<-read.table('S1_expressionAndAnno.txt',header=T,sep="\t",row.names=NULL,stringsAsFactors=F,quote="\"",comment.char="")
 
+#estimate p val from point estimate and null (random) distribution
+permPval<-function(vec,est) {
+  prob<-ecdf(vec)(est)
+  if (prob <= 0.5) {p=prob} else {p=1-prob}
+  p=p*2 #accounts for 2-tailed search
+  return(p)
+}
 
