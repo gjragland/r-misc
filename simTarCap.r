@@ -14,9 +14,9 @@ capturable=c(0,0)
 for (i in 1:nrep) {
 	cut=cutsite[i]
 	if (direction[i]==1) {
-		frag<-c(cut,(cut+400))
+		frag<-c(cut,(cut+flen))
 	} else {
-		frag<-c((cut-400),cut)
+		frag<-c((cut-flen),cut)
 	}
 	if (frag[1] >=1 & frag[2] <= span) {
 		capturable=rbind(capturable,frag)
@@ -40,3 +40,4 @@ for (i in 1:nrow(capturable)) {
 }
 percentReadsCoveringSnp=coverage/nrow(capturable)
 percentReadsCoveringSnp
+
