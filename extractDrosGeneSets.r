@@ -18,11 +18,13 @@ extractDrosGeneSets<-function() {
     for (i in 1:length(catIds)) {
         DrosGoLists[[i]]<-getGenesInSet(catIds[i],db)
     }
+    names(DrosGoLists)<-catIds
     db='org.Dm.egPATH2EG'
     catIds<-Rkeys(get(db))
     DrosKeggLists <- vector("list", length(catIds))
     for (i in 1:length(catIds)) {
         DrosKeggLists[[i]]<-getGenesInSet(catIds[i],db)
     }
+    names(DrosKeggLists)<-catIds
     save(DrosKeggLists,DrosGoLists,file='DrosGoAndKeggGeneLists.rdat')
 }
