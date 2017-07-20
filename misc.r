@@ -25,3 +25,26 @@ permPval<-function(vec,est) {
   return(p)
 }
 
+
+#heat mapping
+library(gplots)
+library(RColorBrewer)
+
+mat<-matrix(nrow=100,ncol=10,byrow=T,rnorm(100*10)*4)
+
+chop<-function(x,thresh=2) {
+  elchop<-function(y) {
+    if (is.na(y)==FALSE & abs(y) > thresh) {
+      if (y > thresh) {y<-thresh}
+      if (y < -thresh) {y<--thresh}
+    }
+    return(y)
+  }
+  sapply(x,elchop)
+}
+
+clus<-heatmap.2(mat,col=brewer.pal(10,"PiYG"),trace="none",Colv=F)
+choppedData<-apply(mat,2,chop,thresh=2)
+heatmap.2(choppedData,col=brewer.pal(10,"PiYG"),trace="none",Colv=F,Rowv=clus$rowDendrogram)
+
+
