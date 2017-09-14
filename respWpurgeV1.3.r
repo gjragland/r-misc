@@ -1,7 +1,8 @@
 #R
-#GJR 2-29-08
+##GJR 2-29-08
+#Last modified 9/14/2017 (misc. debugging)
 #modified 6/1/2017 to allow any recording interval, not just consecutive days (V1.3), plus overhauled most of the code
-  #requires an additional field in the info file
+  ##requires an additional field in the info file
 #modified ~Fall 2011 to accept data with flowrate recorded
 #modified 7-6-09 to reflect error in flowrate
 #modified from matlab file 'resp_data_wPurge.m' on 7-7-09
@@ -80,10 +81,9 @@
 
 respWpurge <- function(infile,outfile,flowMeter=TRUE,flowrate=150) {
 
-#rm(list=ls());
-#Dir <- 'Q:/Greg/Metabolic_rate_fall_2008/GrantHaw_expedata/HawPostWinter';
+
  
-#setwd(Dir);
+#set identity of data columns
 ppmCol=2;
 markerCol=3;
 if (flowMeter==TRUE) {
@@ -95,11 +95,8 @@ if (flowMeter==TRUE) {
 # for 150 ml/min, yields 2.5e-3 L/S
 flowrate<-flowrate*1e-3/60
 
+#read summary file
 inp <- scan(infile, list("","",0,0,0,0,0,0,0,0,0));
-
-
-
- 
 PurgeFile <- inp[[1]];
 MeasureFile <- inp[[2]];
 DateP <- inp[[3]]
@@ -107,56 +104,71 @@ DateM <- inp[[4]];
 PurgeTime <- inp[[5]];
 MeasureTime <- inp[[6]];
 
-
+#set reference locations
 Refs <- data.frame(inp[[7]],inp[[8]],inp[[9]],inp[[10]],inp[[11]]);
 
-#for (it in 1:14) {
+#for each row in summary file (one per purge/measure pair)
 for (it in 1:length(MeasureFile)){
   print(PurgeFile[it])
   print(MeasureFile[it])
   data <- read.table(PurgeFile[it], header=TRUE);
-  
+
+  #set start time Vector using data from purge file
   tStartVec <- 0;
   count=1;
   for (i in 1:nrow(data)) {
-	if (data[i,ncol(data)]!=-1) {
-        tStartVec[count]=PurgeTime[it] + data[i,1]/60^2;
-        count=count+1;
+      if (data[i,ncol(data)]!=-1) {
+          tStartVec[count]=PurgeTime[it] + data[i,1]/60^2;
+          count=count+1;
       }  
   }
+
+  #intialize integrated CO2 and end time vectors
   totalPpmVec<-rep(0,length(tStartVec))
   timeVec<-rep(MeasureTime[it],length(tStartVec))
+
+  #read measurment data and correct units for flow rate if flow rate is measured, not fixed
   data <- read.table(MeasureFile[it], header=TRUE)
-  data[,flowCol]<-data[,flowCol]*1e-3/60 #adjust flowrate as above
+  if (flowMeter==TRUE) {data[,flowCol]<-data[,flowCol]*1e-3/60} #adjust flowrate as above
+  #locate index positions of markers
   markerInd<-which(data[,markerCol]!=-1,arr.ind=T)
+  #add seconds to markers onto the end time vector
+  timeVec<-timeVec+markerInd/(60^2)
+  #set up marker index for a loop: marker to marker, then last marker to end of file
   markerInd<-c(markerInd,nrow(data))
   start=markerInd[1]
   count=1
   vals=vector()
+  #for each measurment interval, integrate to estimate total ppm CO2
   for (i in markerInd[-1]) {
       if (flowMeter==T) {
           vals=data[start:i,ppmCol]*data[start:i,flowCol]
       } else {
           vals=data[start:i,ppmCoo]*flowrate
       }
-      timeVec[count]<-timeVec[count]+start/(60^2)
+      #timeVec[count]<-timeVec[count]+start/(60^2)
       totalPpmVec[count]<-sum(vals)
       if ( (i-start) < 10 ) {totalPpmVec[count]<-NA} #if dummy marker
       count=count+1
       start=i
+      vals=vector()
   }
-  #correct for and remove references
-  ##refInd<-which(Refs[it,]!=0)
+  #subract out mean reference, then remove references from measurement vector
   refInd<-as.numeric(Refs[it,Refs[it,]!=0])
   totalPpmVec<-totalPpmVec[-refInd]-mean(totalPpmVec[refInd])
+  #calculate elapsed time from start time and end time vectors, accounting for multiday recordings
   elapsedTime<-timeVec+ (DateM[it] - DateP[it])*24 - tStartVec
   elapsedTime<-elapsedTime[-refInd]
+  #caclulate rate of CO2 production in ulCO2/h
   ppmPerHour<-totalPpmVec/elapsedTime
+  #create/append output data matrix
   if (it==1) {respCurves<-ppmPerHour} else {respCurves<-cbind(respCurves,ppmPerHour)}
   
 }
+
+#rough plot of respirometric trajectories
 matplot(aperm(array(DateM)),t(respCurves),type='b',xlab='date',ylab='ulCO2/h')
-#matplot(aperm(array(DateM[])),t(respCurves),type='b',xlab='date',ylab='ulCO2/h')
+#output calculated ulCO2/h values
 colnames(respCurves)<-DateM
 write.table(respCurves,outfile, sep="\t",row.names=FALSE,quote=F);
 
@@ -165,4 +177,3 @@ write.table(respCurves,outfile, sep="\t",row.names=FALSE,quote=F);
 
 
 }
-
