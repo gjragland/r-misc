@@ -47,4 +47,20 @@ clus<-heatmap.2(mat,col=brewer.pal(10,"PiYG"),trace="none",Colv=F)
 choppedData<-apply(mat,2,chop,thresh=2)
 heatmap.2(choppedData,col=brewer.pal(10,"PiYG"),trace="none",Colv=F,Rowv=clus$rowDendrogram)
 
+#Parallelize
+
+gsa<-function(ids,data,processors=8,nit=50000) {
+
+    medVal<-median(abs(data[data[,1] %in% ids,2]))
+    n<-length(ids)
+    library(doParallel)
+    cl <- makeCluster(processors)
+    registerDoParallel(cl)
+    out<-foreach(i=1:nit,.combine='c') %dopar% {
+        inds<-sample(1:nrow(data),n)
+        return( median(abs(data[inds,2])) )
+    }
+    stopCluster(cl)
+    return(1-ecdf(out)(medVal))
+}
 
