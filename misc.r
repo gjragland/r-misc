@@ -64,3 +64,9 @@ gsa<-function(ids,data,processors=8,nit=50000) {
     return(1-ecdf(out)(medVal))
 }
 
+#Combine pvals with fisher method
+fisherCombine<-function(x) {
+    chisq<- -2*sum(log(x))
+    return(1-pchisq(chisq,2*length(x)))
+}
+
