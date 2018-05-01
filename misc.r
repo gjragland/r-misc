@@ -70,3 +70,6 @@ fisherCombine<-function(x) {
     return(1-pchisq(chisq,2*length(x)))
 }
 
+
+#change plot axis font size
+plot(x,y,xlim=c(20,90),ylim=c(0,80),xlab='dosage EPO',ylab='hematocrit',cex.axis=2,cex.lab=2,cex=2)
