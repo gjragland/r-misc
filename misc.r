@@ -73,3 +73,23 @@ fisherCombine<-function(x) {
 
 #change plot axis font size
 plot(x,y,xlim=c(20,90),ylim=c(0,80),xlab='dosage EPO',ylab='hematocrit',cex.axis=2,cex.lab=2,cex=2)
+
+
+#pre-planned contrasts
+fm<-lm(sqrt(dayToEclosion)~factor(host)*factor(treatment),data=data[data$diapause==1,])
+
+#                Intercept  haw  m2  m3  m4  m5  m6 h*m2  h*m3  h*m4  h*m5  h*m6
+#h1                  1    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    0,     0,   0 
+#a1                  1    ,   0,  0 , 0  , 0, 0,  0,   0,   0,    0,     0,   0 
+#a<-c(                0    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    0,     0,   0 )
+
+#values for coefficients in rows (contrasts in rows)
+conMat<-cbind( c( 0    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    0,     0,   0),
+              c(0    ,   1,  0 , 0  , 0, 0,  0,   1,   0,    0,     0,   0),
+              c(0    ,   1,  0 , 0  , 0, 0,  0,   0,   1,    0,     0,   0),
+              c(0    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    1,     0,   0),
+              c(0    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    0,     1,   0),
+              c(0    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    0,     0,   1))
+library(multcomp)
+a<-glht(fm,linfct=t(conMat))
+summary(a)
