@@ -93,3 +93,21 @@ conMat<-cbind( c( 0    ,   1,  0 , 0  , 0, 0,  0,   0,   0,    0,     0,   0),
 library(multcomp)
 a<-glht(fm,linfct=t(conMat))
 summary(a)
+
+
+
+
+# from https://stackoverflow.com/questions/63390194/package-xxx-was-installed-before-r-4-0-0-please-re-install-it
+#remove all old packages from old R installation after installing new version
+#first three lines optional, only if you want to re-install every
+#single packge
+old_packages <- installed.packages()
+old_packages <- as.data.frame(old_packages)
+list.of.packages <- unlist(old_packages$Package)
+remove.packages( installed.packages( priority = "NA" )[,1] )
+
+
+# reinstall all packages 
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+lapply(list.of.packages,function(x){library(x,character.only=TRUE)})
