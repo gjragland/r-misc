@@ -1,0 +1,8 @@
+# Calculates rate of CO2 production in ul/s in a multiplexed respirometry run with at least one control chamber
+
+R ulCO2/s = sum( C ulCO2/L * F ml/min * 1e-3L/ml * 1min/60s * 1s ) / ( t.endRecording - t.sealed ) = calc.rate
+
+R.corrected = calc.rate(sample) - calc.rate(control)
+
+sample = two vectors, ppmCO2 & flowrate_ml_min for sample
+control = two vectors, ppmCO2 & flowrate_ml_min for control (blank chamber)
